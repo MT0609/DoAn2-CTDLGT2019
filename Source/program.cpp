@@ -14,20 +14,15 @@ int main()
 		_getch();
 		return 0;
 	}
-	char* str;
+	string txt;
 	int count = 0;
-	str = new char[0];
 	char a;
 	while (!fp.eof())
 	{
 		fp.get(a);
-		str = (char*)realloc(str, ++count * sizeof(char));
-		str[count - 1] = a;
+		txt.push_back(a);
 	};
 	fp.close();
-	str[count] = '\0';
-	string txt(str);
-
 	
 	priority_queue<Node*, vector<Node*>, comp> pq;
 	string path;
