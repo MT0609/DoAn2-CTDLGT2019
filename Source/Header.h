@@ -1,15 +1,14 @@
-#include<iostream>
+﻿#include<iostream>
 #include<string>
-#include<string.h>
 #include<queue>
 #include<unordered_map>
+#include<map>
 #include<fstream>
 #include<bitset>
 #include<conio.h>
 using namespace std;
+#pragma once
 
-
-// A Tree node
 struct Node
 {
 	char ch;
@@ -17,26 +16,21 @@ struct Node
 	Node *left, *right;
 };
 
-// Comparison object to be used to order the heap
 struct comp
 {
 	bool operator()(Node* l, Node* r)
 	{
-		// highest priority item has lowest frequency
 		return l->freq > r->freq;
 	}
 };	
 
 
-// Function to allocate a new tree node
-Node* getNode(char ch, int freq, Node* left, Node* right);
+Node* getNode(char ch, int freq, Node* left, Node* right);			// tạo 1 node mới có chứa các thông tin: kí tự, tần số, nút con trái-phải
 
-// traverse the Huffman Tree and store Huffman Codes
-// in a map.
-void encode(Node* root, string str, unordered_map<char, string> &huffmanCode);
+void encode(Node* root, string str, map<char, string> &huffmanCode);		// mã hóa các kí tự xuất hiện trong file thành mã huffman
 
-// traverse the Huffman Tree and decode the encoded string
-void decode(Node* root, string code, ofstream &decompress, int& index);
+void decode(Node* root, string code, ofstream & out);			// giải mã mã huffman thành các kí tự bằng cách duyệt cây
 
-// Builds Huffman Tree and decode given input text
-void compress(string text, priority_queue<Node*, vector<Node*>, comp> &pq, string &code, string &path);
+void compress(string text, priority_queue<Node*, vector<Node*>, comp> &pq, string &code, string &path);		// Hàm nén tệp ghi ra file nhị phân
+
+void fileCompressExecute();		// Hàm thực thi chương trình

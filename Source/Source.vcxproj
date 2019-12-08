@@ -117,10 +117,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="folderCompression.cpp" />
     <ClCompile Include="Huffman.cpp" />
     <ClCompile Include="program.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="folder.h" />
     <ClInclude Include="Header.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

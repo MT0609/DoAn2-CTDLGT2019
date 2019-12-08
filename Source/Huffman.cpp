@@ -1,9 +1,9 @@
 ﻿#include"Header.h"
 
-// Function to allocate a new tree node
+
 Node* getNode(char ch, int freq, Node* left, Node* right)
 {
-	Node* node = new Node();
+	Node* node = new Node;
 
 	node->ch = ch;
 	node->freq = freq;
@@ -13,58 +13,37 @@ Node* getNode(char ch, int freq, Node* left, Node* right)
 	return node;
 }
 
-// Builds Huffman Tree and decode given input text
+
+// Xây dựng cây huffman sử dụng hàng đợi ưu tiên
 void compress(string text,  priority_queue<Node*, vector<Node*>, comp> &pq, string &code, string &path)
 {
-	// count frequency of appearance of each character
-	// and store it in a map
-	unordered_map<char, int> freq;
-	for (char ch : text) {
-		freq[ch]++;
+	// đếm tần số xuất hiện của các kí tự trong file text
+	map<char, int> freq;
+	int text_len = text.length();
+	for (int i = 0; i < text_len; ++i) {
+		freq[text[i]]++;
 	}
 
-	// Create a priority queue to store live nodes of
-	// Huffman tree;
+	// tạo hàng đợi ưu tiên cho các nút chứa kí tự và tần số
+	for (auto i = freq.begin(); i != freq.end(); ++i)
+		pq.push(getNode(i->first, i->second, NULL, NULL));
 
-	// Create a leaf node for each character and add it
-	// to the priority queue.
-	for (auto pair : freq) {
-		pq.push(getNode(pair.first, pair.second, NULL, NULL));
-	}
-
-	// do till there is more than one node in the queue
 	while (pq.size() != 1)
 	{
-		// Remove the two nodes of highest priority
-		// (lowest frequency) from the queue
+		// Loại 2 node có độ ưu tiên cao nhất (tần số bé nhất) khỏi hàng đợi và add node mới có 2 con là 2 node vừa loại
 		Node *left = pq.top(); pq.pop();
 		Node *right = pq.top();	pq.pop();
-
-		// Create a new internal node with these two nodes
-		// as children and with frequency equal to the sum
-		// of the two nodes' frequencies. Add the new node
-		// to the priority queue.
 		int sum = left->freq + right->freq;
 		pq.push(getNode('\0', sum, left, right));
+		// thực hiện đến khi hàng đợi chỉ còn 1 node chính (không tính con)
 	}
-
-	// root stores pointer to root of Huffman Tree
 	Node* root = pq.top();
 
-	// traverse the Huffman Tree and store Huffman Codes
-	// in a map. Also prints them
-	unordered_map<char, string> huffmanCode;
+	// duyệt cây huffman và tạo bảng kí tự -> mã huffman
+	map<char, string> huffmanCode;
 	encode(root, "", huffmanCode);
-
-	cout << endl << "Encoded Table: " << endl;
-	for (auto pair : huffmanCode) {
-		cout << pair.first << " " << pair.second << '\n';
-	}
-
-	// print encoded string
-	for (char ch : text) {
-		code.append(huffmanCode[ch]);
-	}
+	for (int i = 0; i < text_len; ++i)
+		code += huffmanCode[text[i]];	
 
 	cout << "Compressed file path: ";
 	cin >> path;
@@ -75,33 +54,25 @@ void compress(string text,  priority_queue<Node*, vector<Node*>, comp> &pq, stri
 	int j = 0;
 	for (int i = 0; i < times; ++i)
 	{
-		char *s;
-		int len = 8;
-		s = new char[len];
+		string s;
 		for (int k = 0; k < 8; ++k)
 		{
-			s[k] = code[j];
+			s += code[j];
 			++j;
 		}
-		s[len] = '\0';	
 
 		bitset<8> set(s);
-		const char toWrite = (unsigned char)((unsigned int)set.to_ulong());
-		fp.write(&toWrite, sizeof(char));
+		fp.write((char*)&set, sizeof(char));
 	}
 
 	if (n % 8 != 0)
 	{
-		char *s; int len = n % 8;
-		s = new char[len];
-		for (int k = 0; k < len; ++k)
+		string s;
+		for (int k = 0; k < n % 8; ++k)
 		{
-			//s = (char*)realloc(s, ++k * sizeof(char));
-			s[k] = code[j];
+			s += code[j];
 			++j;
 		}
-		s[len] = '\0';
-
 		bitset<8> set(s);
 		fp.write((char*)&set, sizeof(char));
 	}
@@ -109,38 +80,29 @@ void compress(string text,  priority_queue<Node*, vector<Node*>, comp> &pq, stri
 	fp.close();
 }
 
-// traverse the Huffman Tree and decode the encoded string
-void decode(Node* root, string code, ofstream &decompress, int& index)
+void decode(Node* root, string code, ofstream & out)
 {
-	//static int index = -1;
-	if (root == NULL) {
-		return;
-	}
-
-	// found a leaf node
-	if (root->left == NULL && root->right == NULL)
+	Node* pos = root;
+	for (int i = 0; i < code.length(); ++i)
 	{
-		decompress << root->ch;
-		return;
+		if (code[i] == '1')
+			pos = pos->right;
+		else 
+			pos = pos->left;
+		if (pos->left == NULL && pos->right == NULL)
+		{
+			out.write((char*)&pos->ch, 1);
+			pos = root;
+		}
 	}
-
-	index++;
-
-	if (code[index] == '0')
-		decode(root->left, code, decompress, index);
-	else if (code[index] == '1')
-		decode(root->right, code, decompress, index);
+	delete pos;
 }
 
-
-// traverse the Huffman Tree and store Huffman Codes
-// in a map.
-void encode(Node* root, string str, unordered_map<char, string> &huffmanCode)
+void encode(Node* root, string str, map<char, string> &huffmanCode)
 {
-	if (root == nullptr)
+	if (root == NULL)
 		return;
 
-	// found a leaf node
 	if (root->left == NULL && root->right == NULL) {
 		huffmanCode[root->ch] = str;
 	}
@@ -149,3 +111,72 @@ void encode(Node* root, string str, unordered_map<char, string> &huffmanCode)
 	encode(root->right, str + "1", huffmanCode);
 }
 
+void fileCompressExecute()
+{
+	string c;
+	cout << "Text-file path: ";
+	cin >> c;
+	ifstream fp;
+	fp.open(c);
+	if (fp.fail())
+	{
+		cout << "CANNOT OPEN FILE!";
+		_getch();
+		return;
+	}
+	string txt;
+	int count = 0;
+	char ch;
+	while (!fp.eof())
+	{
+		fp.get(ch);
+		if (ch != 13)
+			txt += ch;
+	};
+	fp.close();
+
+	priority_queue<Node*, vector<Node*>, comp> pq;
+	string path;
+	string code = "";
+	compress(txt, pq, code, path);		// create huffman code and compress file; save priority queue (pq), code, filepath for later use
+	Node* r = pq.top();
+
+	ifstream readbin(path, ios::binary);
+	if (readbin.fail())
+	{
+		cout << "CANNOT OPEN COMPRESSED FILE!";
+		_getch();
+		return;
+	}
+
+	string s = "";
+	while (!readbin.eof())
+	{
+		bitset<8> set;
+		readbin.read((char*)&set, sizeof(char));
+		s.append(set.to_string());
+	}
+
+	s.erase(s.length() - 8, 8);
+	int i = s.length() - 8;
+	while (s[i] == '0')
+	{
+		s.erase(i, 1);
+	}
+	readbin.close();
+
+	string decompr;
+	cout << "Decompressed File Path: ";
+	cin >> decompr;
+	ofstream decompress(decompr);
+	if (decompress.fail())
+	{
+		cout << endl << "\tCANNOT OPEN FILE TO WRITE!";
+		_getch();
+		return;
+	}
+	decode(r, s, decompress);
+
+	cout << "Done!";
+	decompress.close();
+}

@@ -18,6 +18,9 @@
     <ClInclude Include="Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="folder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Huffman.cpp">
@@ -25,6 +28,9 @@
     </ClCompile>
     <ClCompile Include="program.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="folderCompression.cpp">
+      <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
